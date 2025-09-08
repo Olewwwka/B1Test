@@ -1,4 +1,5 @@
 ﻿using Task1.Generator;
+using System.Text;
 
 namespace Task1.Generators
 {
@@ -16,18 +17,31 @@ namespace Task1.Generators
 
         public void GenerateFiles()
         {
-            for(int i = 0; i < FilesConstants.CountOfFiles; i++)
+            for (int i = 0; i < FilesConstants.CountOfFiles; i++)
             {
+                var stringBuiler = new StringBuilder();
+
                 string path = Path.Combine(FilesConstants.DirectoryName, $"file{i:00}.txt");
 
                 using var writer = new StreamWriter(path);
 
-                for(int j = 0; j < FilesConstants.CountOfLines; j++)
+                for (int j = 0; j < FilesConstants.CountOfLines; j++)
                 {
-                    writer.WriteLine(_generator.GetString());
+                    stringBuiler.AppendLine(_generator.GetString());
+
+                    if ((j + 1) % FilesConstants.BufferSize == 0)
+                    {
+                        writer.Write(stringBuiler.ToString());
+                        stringBuiler.Clear();
+                    }
                 }
 
-                Console.WriteLine(path + " success");
+                if (stringBuiler.Length > 0)
+                {
+                    writer.Write(stringBuiler.ToString());
+                }
+
+                Console.WriteLine("File created: " + path);
             }
         }
 

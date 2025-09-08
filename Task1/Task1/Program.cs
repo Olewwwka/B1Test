@@ -1,5 +1,6 @@
 ﻿using Task1.Generator;
 using Task1.Generators;
+using Task1.Services;
 
 public class Program
 {
@@ -8,5 +9,9 @@ public class Program
         var filesGenerator = new FilesGenerator();
 
         filesGenerator.GenerateFiles();
+
+        var mergeService = new MergeService();
+
+        mergeService.MergeFiles("abc");
     }
 }
