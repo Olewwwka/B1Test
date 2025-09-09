@@ -22,5 +22,9 @@ public class Program
         var importService = new ImportService(dbContext);
 
         await importService.ImportFileAsync(FilesConstants.MergedFileName);
+
+        var statsService = new StatisticsService(dbContext);
+
+        await statsService.GetStatistics();
     }
 }
