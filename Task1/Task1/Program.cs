@@ -8,23 +8,57 @@ public class Program
     public static async Task Main(string[] args)
     {
         using var dbContext = new Task1Context();
-
         dbContext.Database.Migrate();
 
-        var filesGenerator = new FilesGenerator();
+        while (true)
+        {
+            Console.WriteLine("1 - Generate files");
+            Console.WriteLine("2 - Merge files");
+            Console.WriteLine("3 - Import file");
+            Console.WriteLine("4 - Get statistics");
 
-        filesGenerator.GenerateFiles();
+            var choice = Console.ReadLine();
 
-        var mergeService = new MergeService();
+            switch (choice)
+            {
+                case "1":
+                    var filesGenerator = new FilesGenerator();
 
-        mergeService.MergeFiles("abc");
+                    filesGenerator.GenerateFiles();
 
-        var importService = new ImportService(dbContext);
+                    break;
 
-        await importService.ImportFileAsync(FilesConstants.MergedFileName);
+                case "2":
+                    var mergeService = new MergeService();
 
-        var statsService = new StatisticsService(dbContext);
+                    Console.Write("Input pattern(ex: abc)");
+                    var pattern = Console.ReadLine();
 
-        await statsService.GetStatistics();
+                    mergeService.MergeFiles(pattern);
+
+                    break;
+
+                case "3":
+                    var importService = new ImportService(dbContext);
+
+                    Console.Write("File name: ");
+                    var fileName = Console.ReadLine();
+
+                    fileName = string.IsNullOrEmpty(fileName) ? FilesConstants.MergedFileName : fileName;
+
+                    await importService.ImportFileAsync(fileName);
+
+                    break;
+
+                case "4":
+                    var statsService = new StatisticsService(dbContext);
+                    await statsService.GetStatistics();
+                    break;
+
+                default:
+                    Console.WriteLine("Invalid choice.");
+                    break;
+            }
+        }
     }
 }

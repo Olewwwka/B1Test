@@ -13,6 +13,11 @@ namespace Task1.Services
 
         public void MergeFiles(string? substring)
         {
+            if(File.Exists(_mergedPath))
+            {
+                File.Delete(_mergedPath);
+            }
+
             int countOfDeleted = 0;
             var files = Directory.GetFiles(FilesConstants.DirectoryName);
 
