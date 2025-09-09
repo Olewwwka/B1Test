@@ -3,10 +3,21 @@ using System.Text;
 
 namespace Task1.Generators
 {
+    /// <summary>
+    /// Generates text files with test data
+    /// Each file contains a specified number
+    /// </summary>
     public class FilesGenerator
     {
+        /// <summary>
+        /// Generator class of random strings
+        /// </summary>
         private StringGenerator _generator { get; set; }
 
+        /// <summary>
+        /// Constructor for creating new instance of class
+        /// Creates new instance of generator and clear existing directory
+        /// </summary>
         public FilesGenerator()
         {
             var generatorOfVariables = new GeneratorOfVariables();
@@ -14,7 +25,10 @@ namespace Task1.Generators
 
             CheckDirectory();
         }
-
+        /// <summary>
+        /// Generate const count of files with test data
+        /// Every file contains const number of rows
+        /// </summary>
         public void GenerateFiles()
         {
             for (int i = 0; i < FilesConstants.CountOfFiles; i++)

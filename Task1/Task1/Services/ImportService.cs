@@ -2,17 +2,34 @@
 
 namespace Task1.Services
 {
+    /// <summary>
+    /// Service which import data from file to database
+    /// </summary>
     public class ImportService
     {
+        /// <summary>
+        /// Instance of DbConxext
+        /// </summary>
         private readonly Task1Context _dbContext;
+        /// <summary>
+        /// Buffer that allows save data in database in partss 
+        /// </summary>
         private readonly List<RowModel> _buffer = new();
 
+        /// <summary>
+        /// Constructor thats create instance of service and turns of ChangeTracker
+        /// </summary>
+        /// <param name="context">Existing instance of DbContext</param>
         public ImportService(Task1Context context)
         {
             _dbContext = context;
             _dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
         }
-
+        /// <summary>
+        /// Class thats read lines from .txt file and save them in database in parts with const zise
+        /// </summary>
+        /// <param name="fileName">Name of file which importing in database</param>
+        /// <returns>Comlited task</returns>
         public async Task ImportFileAsync(string fileName)
         {
             var path = Path.Combine(FilesConstants.DirectoryName, fileName);
