@@ -1,14 +1,14 @@
-﻿using System.Text;
-
-namespace Task1.Generator
+﻿namespace Task1.Generator
 {
     public class StringGenerator
     {
         public GeneratorOfVariables _generator;
+
         public StringGenerator(GeneratorOfVariables generator)
         {
             _generator = generator;
         }
+
         public string GetString()
         {
             return $"{_generator.GetRandomDate()}||" +

@@ -11,5 +11,7 @@
         public const string MergedFileName = "merged.txt";
 
         public const int BufferSize = 10000;
+
+        public const int RowsBuffer = 50000;
     }
 }
