@@ -1,0 +1,207 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reports Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .file-upload, .report-list {
+            margin-bottom: 20px;
+        }
+
+        button {
+            margin-left: 10px;
+        }
+
+        /* Новый блок для ошибок */
+        #errorContainer {
+            color: red;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid red;
+            background-color: #ffe6e6;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reports Manager</h1>
+
+    <div class="file-upload">
+        <input type="file" id="fileInput">
+        <button onclick="uploadReport()">Upload Report</button>
+    </div>
+
+    <div class="report-list">
+        <select id="reportsSelect" onchange="loadReport()">
+            <option value="">Select a report</option>
+        </select>
+        <button onclick="exportReport()">Export to Excel</button>
+    </div>
+
+    <div id="errorContainer"></div>
+
+    <div id="reportTableContainer"></div>
+
+    <script>
+        const apiBase = '/api/reports';
+
+        function showError(message) {
+            const container = document.getElementById('errorContainer');
+            container.innerText = message;
+            container.style.display = 'block';
+        }
+
+        function clearError() {
+            const container = document.getElementById('errorContainer');
+            container.innerText = '';
+            container.style.display = 'none';
+        }
+
+        async function fetchReports() {
+            clearError();
+            try {
+                const res = await fetch(apiBase);
+                if (!res.ok) throw new Error(`Failed to fetch reports: ${res.statusText}`);
+                const reports = await res.json();
+                const select = document.getElementById('reportsSelect');
+                select.innerHTML = '<option value="">Select a report</option>';
+                reports.forEach(r => {
+                    const option = document.createElement('option');
+                    option.value = r.reportId;
+                    option.text = `${r.bankName} - ${new Date(r.reportDate).toLocaleDateString()}`;
+                    select.appendChild(option);
+                });
+            } catch (err) {
+                showError(err.message);
+            }
+        }
+
+        async function uploadReport() {
+            clearError();
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput.files.length) {
+                showError('Please select a file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const res = await fetch(`${apiBase}/upload`, { method: 'POST', body: formData });
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(errText || 'Upload failed');
+                }
+                await fetchReports();
+            } catch (err) {
+                showError(err.message);
+            }
+        }
+
+        async function loadReport() {
+            clearError();
+            const select = document.getElementById('reportsSelect');
+            const reportId = select.value;
+            if (!reportId) return;
+
+            try {
+                const res = await fetch(`${apiBase}/${reportId}`);
+                if (!res.ok) throw new Error(`Failed to fetch report: ${res.statusText}`);
+                const report = await res.json();
+
+                const container = document.getElementById('reportTableContainer');
+                container.innerHTML = '';
+
+                const table = document.createElement('table');
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                        <tr>
+                            <th>Account</th>
+                            <th>ClassCode</th>
+                            <th>OpeningBalanceActive</th>
+                            <th>OpeningBalancePassive</th>
+                            <th>TurnoverDebit</th>
+                            <th>TurnoverCredit</th>
+                            <th>ClosingBalanceActive</th>
+                            <th>ClosingBalancePassive</th>
+                        </tr>`;
+                table.appendChild(thead);
+
+                const tbody = document.createElement('tbody');
+                report.reportLines.forEach(rl => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                            <td>${rl.account.accountCode}</td>
+                            <td>${rl.account.classCode}</td>
+                            <td>${rl.openingBalanceActive}</td>
+                            <td>${rl.openingBalancePassive}</td>
+                            <td>${rl.turnoverDebit}</td>
+                            <td>${rl.turnoverCredit}</td>
+                            <td>${rl.closingBalanceActive}</td>
+                            <td>${rl.closingBalancePassive}</td>`;
+                    tbody.appendChild(tr);
+                });
+
+                table.appendChild(tbody);
+                container.appendChild(table);
+            } catch (err) {
+                showError(err.message);
+            }
+        }
+
+        async function exportReport() {
+            clearError();
+            const select = document.getElementById('reportsSelect');
+            const reportId = select.value;
+            if (!reportId) {
+                showError('Select a report first');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${apiBase}/${reportId}/export`);
+                if (!res.ok) throw new Error(`Export failed: ${res.statusText}`);
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Report_${reportId}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } catch (err) {
+                showError(err.message);
+            }
+        }
+
+        fetchReports();
+    </script>
+</body>
+</html>
