@@ -68,7 +68,7 @@ Description - screenshot of Viewing the list of uploaded files
 Description - Displaying data from a DBMS
 
 
-## Task1.4 - Export data
+## Task2.4 - Download data
 
 ![Export](Task2/images/task2.3.png)
 
